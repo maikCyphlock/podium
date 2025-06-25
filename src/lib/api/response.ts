@@ -8,7 +8,7 @@ type SuccessResponseOptions<T> = {
 
 type ErrorResponseOptions = {
   error: string;
-  details?: any;
+  details?: unknown;
   status?: number;
 };
 
@@ -68,7 +68,7 @@ export class ApiResponse {
     });
   }
 
-  static badRequest(message = 'Solicitud inválida', details?: any) {
+  static badRequest(message = 'Solicitud inválida', details?: unknown) {
     return ApiResponse.error({
       error: message,
       details,

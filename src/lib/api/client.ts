@@ -1,9 +1,7 @@
-import { ApiResponse } from './response';
-
-type RequestOptions = {
+type RequestOptions<T = unknown> = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   headers?: Record<string, string>;
-  body?: any;
+  body?: T;
   credentials?: RequestCredentials;
 };
 
@@ -18,7 +16,7 @@ export class ApiClient {
     };
   }
 
-  private async request<T = any>(
+  private async request<T = unknown>(
     endpoint: string,
     options: RequestOptions = {}
   ): Promise<T> {
@@ -56,35 +54,35 @@ export class ApiClient {
     }
   }
 
-  public get<T = any>(endpoint: string, options: Omit<RequestOptions, 'method' | 'body'> = {}) {
+  public get<T = unknown>(endpoint: string, options: Omit<RequestOptions, 'method' | 'body'> = {}) {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  public post<T = any>(
+  public post<T = unknown, B = unknown>(
     endpoint: string,
-    body: any,
-    options: Omit<RequestOptions, 'method'> = {}
+    body: B,
+    options: Omit<RequestOptions<B>, 'method'> = {}
   ) {
     return this.request<T>(endpoint, { ...options, method: 'POST', body });
   }
 
-  public put<T = any>(
+  public put<T = unknown, B = unknown>(
     endpoint: string,
-    body: any,
-    options: Omit<RequestOptions, 'method'> = {}
+    body: B,
+    options: Omit<RequestOptions<B>, 'method'> = {}
   ) {
     return this.request<T>(endpoint, { ...options, method: 'PUT', body });
   }
 
-  public patch<T = any>(
+  public patch<T = unknown, B = unknown>(
     endpoint: string,
-    body: any,
-    options: Omit<RequestOptions, 'method'> = {}
+    body: B,
+    options: Omit<RequestOptions<B>, 'method'> = {}
   ) {
     return this.request<T>(endpoint, { ...options, method: 'PATCH', body });
   }
 
-  public delete<T = any>(
+  public delete<T = unknown>(
     endpoint: string,
     options: Omit<RequestOptions, 'method' | 'body'> = {}
   ) {
@@ -96,7 +94,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'ApiError';

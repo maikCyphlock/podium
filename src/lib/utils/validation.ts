@@ -129,14 +129,15 @@ export const containsSpecialCharSchema = z.string().regex(
  * @param condition Condición que debe cumplirse
  * @param schema Esquema a aplicar cuando se cumple la condición
  */
-export const conditionalSchema = <T extends z.ZodTypeAny>(
+export const conditionalSchema = <T extends z.ZodTypeAny, V = unknown>(
   fieldName: string,
-  condition: (val: any) => boolean,
+  condition: (val: V) => boolean,
   schema: T
 ) => z.object({
-  [fieldName]: z.any().transform((val, ctx) => {
-    if (condition(val)) {
-      const result = schema.safeParse(val);
+  [fieldName]: z.unknown().transform((val: unknown, ctx) => {
+    const typedVal = val as V;
+    if (condition(typedVal)) {
+      const result = schema.safeParse(typedVal);
       if (!result.success) {
         result.error.errors.forEach((error) => {
           ctx.addIssue({
