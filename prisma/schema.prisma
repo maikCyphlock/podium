@@ -11,18 +11,41 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  password      String
-  image         String?
-  role          Role      @default(USER)
-  events        Event[]
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String      @id @default(cuid())
+  name               String?
+  email              String      @unique
+  emailVerified      DateTime?
+  password           String
+  image              String?
+  role               Role        @default(USER)
+  onboardingCompleted Boolean     @default(false)
+  events             Event[]
+  accounts           Account[]
+  sessions           Session[]
+  profile            UserProfile?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model UserProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName       String
+  lastName        String
+  birthDate       DateTime
+  gender          String
+  country         String
+  city            String
+  phone           String
+  emergencyContact String
+  emergencyPhone  String
+  bloodType       String?
+  documentType    String
+  documentNumber  String
+  address         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Account {
