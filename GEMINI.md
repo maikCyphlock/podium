@@ -80,6 +80,9 @@ This project adheres to a philosophy of rigor and reliability, inspired by NASA'
     *   Enable and enforce strict linter rules (e.g., ESLint) from the beginning.
     *   All code must pass linter and compiler checks (`tsc --noEmit`) without any warnings or errors before being merged.
 
+## GIT
+use gitmoji to commit
+
 ## Commands
 
 *   `npm run dev`: To start the development server.
