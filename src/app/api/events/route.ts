@@ -6,21 +6,34 @@ import { eventSchema } from '@/lib/validations/schemas';
 
 export async function GET(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const skip = (page - 1) * limit;
 
-    const [events, total] = await Promise.all([
-      prisma.event.findMany({
-        where: {
+    // Si el usuario está autenticado, filtramos por sus eventos.
+    // De lo contrario, mostramos los eventos públicos.
+    const whereClause = session?.user?.id
+      ? {
+          userId: session.user.id,
           OR: [
             { title: { contains: search, mode: 'insensitive' } },
             { description: { contains: search, mode: 'insensitive' } },
           ],
+        }
+      : {
           isPublished: true,
-        },
+          OR: [
+            { title: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        };
+
+    const [events, total] = await Promise.all([
+      prisma.event.findMany({
+        where: whereClause,
         include: {
           user: {
             select: {
@@ -30,22 +43,17 @@ export async function GET(request: Request) {
             },
           },
           categories: true,
+          _count: { // Incluimos el conteo de participantes
+            select: { participants: true },
+          },
         },
         orderBy: {
-          date: 'asc',
+          date: 'desc', // Mostramos los más recientes primero para el dashboard
         },
         skip,
         take: limit,
       }),
-      prisma.event.count({
-        where: {
-          OR: [
-            { title: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
-          ],
-          isPublished: true,
-        },
-      }),
+      prisma.event.count({ where: whereClause }),
     ]);
 
     return NextResponse.json({

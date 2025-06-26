@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { authOptions } from '@/lib/auth/options';
 import { profileSchema } from '@/lib/validations/schemas';
+import { getToken } from 'next-auth/jwt';
+import { headers } from 'next/headers';
+import { update } from '@/lib/auth/utils';
 
 // Helper function to create a JSON response with CORS headers
 const jsonResponse = (data: any, status: number = 200) => {
@@ -68,6 +71,27 @@ export async function POST(request: Request) {
         profile: true,
       },
     });
+
+    // Update the session with the new data
+    const currentSession = await getServerSession(authOptions);
+    if (currentSession) {
+      try {
+        await update({
+          user: {
+            ...currentSession.user,
+            ...updatedUser,
+            name: updatedUser.name || '',
+            email: updatedUser.email || '',
+            image: null,
+            profile: updatedUser.profile || null,
+            onboardingCompleted: true
+          }
+        });
+      } catch (error) {
+        console.error('Error updating session:', error);
+        // Continue even if session update fails, as the profile was updated
+      }
+    }
 
     return jsonResponse({
       user: updatedUser,

@@ -70,12 +70,30 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // 1. Al iniciar sesión por primera vez (user object está presente)
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.onboardingCompleted = user.onboardingCompleted;
+        return token;
       }
+
+      // 2. Cuando la sesión se actualiza explícitamente (ej. después del onboarding)
+      if (trigger === 'update' && session?.user) {
+        // Recargamos los datos del usuario desde la BD para asegurar que estén frescos
+        const refreshedUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+        });
+
+        if (refreshedUser) {
+          token.onboardingCompleted = refreshedUser.onboardingCompleted;
+          token.name = refreshedUser.name;
+          token.role = refreshedUser.role;
+        }
+      }
+
+      // 3. En cualquier otro caso, devolvemos el token como está
       return token;
     },
     async session({ session, token }) {
