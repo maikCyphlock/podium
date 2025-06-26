@@ -77,6 +77,8 @@ This project adheres to a philosophy of rigor and reliability, inspired by NASA'
     *   Always handle the resolved and rejected states of Promises. Use `try/catch` with `async/await` or `.catch()` for promise chains.
     *   Functions should have explicit `return` statements. Avoid implicit `undefined` returns where a value is expected.
 
+** Try every time to make most decouple code but without making overengineering**
+
 *   **No Magic Strings or Numbers:**
     *   Use `enum` or `const` for string literals and numeric constants to improve readability and prevent typos.
 

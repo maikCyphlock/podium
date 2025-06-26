@@ -83,6 +83,7 @@ This project adheres to a philosophy of rigor and reliability, inspired by NASA'
 ## GIT
 use gitmoji to commit
 
+** Try every time to make most decouple code but without making overengineering**
 ## Commands
 
 *   `npm run dev`: To start the development server.
