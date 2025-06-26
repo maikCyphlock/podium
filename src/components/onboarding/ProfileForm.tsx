@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { useSession } from 'next-auth/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { profileSchema, type ProfileInput } from '@/lib/validations/schemas';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ export function ProfileForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const router = useRouter();
+  const { data: session, update } = useSession();  
 
   const {
     register,
@@ -173,8 +175,8 @@ export function ProfileForm() {
       toast.success('¡Perfil actualizado!', {
         description: 'Tu perfil ha sido guardado correctamente.',
       });
+      await update({ user: { ...session?.user, onboardingCompleted: true } });
 
-      // Redirect to dashboard
       router.push('/dashboard');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al guardar el perfil';
