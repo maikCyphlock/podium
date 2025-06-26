@@ -1,18 +1,34 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db/prisma";
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 
+declare module "next-auth" {
+  interface User {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    onboardingCompleted: boolean;
+  }
+
+  interface Session {
+    user: User;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
+  // @ts-ignore - PrismaAdapter has a type mismatch with the latest NextAuth
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
   },
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error",
+    signIn: "/login",
+    signOut: "/",
+    error: "/login?error=Unauthorized",
+    newUser: "/onboarding"
   },
   providers: [
     CredentialsProvider({
@@ -46,9 +62,10 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          name: user.name,
+          name: user.name || '',
           role: user.role,
-        };
+          onboardingCompleted: user.onboardingCompleted || false
+        } as User;
       },
     }),
   ],
@@ -57,6 +74,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.onboardingCompleted = user.onboardingCompleted;
       }
       return token;
     },
@@ -64,6 +82,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.onboardingCompleted = token.onboardingCompleted as boolean;
       }
       return session;
     },

@@ -1,5 +1,5 @@
 type RequestOptions<T = unknown> = {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
   headers?: Record<string, string>;
   body?: T;
   credentials?: RequestCredentials;

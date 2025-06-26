@@ -3,45 +3,59 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
   const token = await getToken({ req: request });
-
-  // Rutas públicas que no requieren autenticación
+  
+  // Public paths that don't require authentication
   const publicPaths = [
     '/',
-    '/auth/signin',
-    '/auth/signup',
-    '/auth/error',
+    '/login',
+    '/register',
     '/api/auth',
-    '/api/events',
-    '/api/categories',
+    '/_next',
+    '/favicon.ico',
   ];
-
-  // Si la ruta es pública, permitir el acceso
-  if (publicPaths.some(path => pathname.startsWith(path))) {
+  
+  // Allow all API routes to handle their own authentication
+  if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 
-  // Si no hay token, redirigir al login
+  // Redirect old auth routes
+  if (pathname.startsWith('/auth/')) {
+    const newUrl = new URL(pathname.replace('/auth', ''), request.url);
+    return NextResponse.redirect(newUrl);
+  }
+
+  // Allow access to public paths
+  if (publicPaths.some(path => 
+    pathname === path || 
+    pathname.startsWith(`${path}/`) ||
+    pathname.startsWith('/_next/')
+  )) {
+    return NextResponse.next();
+  }
+
+  // If no token, redirect to login with return URL (only for non-API routes)
   if (!token) {
-    const loginUrl = new URL('/auth/signin', request.url);
-    loginUrl.searchParams.set('callbackUrl', pathname);
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('callbackUrl', pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ''));
     return NextResponse.redirect(loginUrl);
   }
 
-  // Rutas de administración que requieren rol de ADMIN
-  const adminPaths = ['/admin'];
-  if (adminPaths.some(path => pathname.startsWith(path)) && token.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  // If authenticated but trying to access login/register, redirect to dashboard
+  if (pathname === '/login' || pathname === '/register') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Rutas de organizador que requieren rol de ORGANIZER o ADMIN
-  const organizerPaths = ['/dashboard', '/events/create'];
-  if (
-    organizerPaths.some(path => pathname.startsWith(path)) &&
-    !['ORGANIZER', 'ADMIN'].includes(token.role)
-  ) {
-    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  // If onboarding not completed, redirect to onboarding
+  if (!token.onboardingCompleted && pathname !== '/onboarding') {
+    return NextResponse.redirect(new URL('/onboarding', request.url));
+  }
+
+  // If onboarding completed but trying to access onboarding, redirect to dashboard
+  if (token.onboardingCompleted && pathname === '/onboarding') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();

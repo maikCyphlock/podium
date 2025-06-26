@@ -31,6 +31,28 @@ export const raceSchema = z.object({
   categoryIds: z.array(z.string().cuid()).min(1, 'Se requiere al menos una categoría'),
 });
 
+// Esquema base para la información de perfil
+export const profileSchema = z.object({
+  firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
+  birthDate: z.string().datetime('Fecha de nacimiento inválida'),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'], {
+    required_error: 'El género es requerido',
+  }),
+  country: z.string().min(2, 'El país es requerido'),
+  city: z.string().min(2, 'La ciudad es requerida'),
+  phone: z.string().min(8, 'El teléfono debe tener al menos 8 dígitos'),
+  emergencyContact: z.string().min(2, 'El contacto de emergencia es requerido'),
+  emergencyPhone: z.string().min(8, 'El teléfono de emergencia es requerido'),
+  bloodType: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'UNKNOWN']).optional(),
+  documentType: z.enum(['DNI', 'PASSPORT', 'DRIVING_LICENSE', 'OTHER']),
+  documentNumber: z.string().min(4, 'El número de documento es requerido'),
+  address: z.string().min(5, 'La dirección es requerida'),
+  acceptTerms: z.boolean().refine(val => val === true, {
+    message: 'Debes aceptar los términos y condiciones',
+  }),
+});
+
 export const participantSchema = z.object({
   firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
@@ -71,6 +93,7 @@ export type UserInput = z.infer<typeof userSchema>;
 export type EventInput = z.infer<typeof eventSchema>;
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type RaceInput = z.infer<typeof raceSchema>;
+export type ProfileInput = z.infer<typeof profileSchema>;
 export type ParticipantInput = z.infer<typeof participantSchema>;
 export type ResultInput = z.infer<typeof resultSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
