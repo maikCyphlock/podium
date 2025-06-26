@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: { callbackUrl?: string; error?: string };
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await getServerSession(authOptions);
-  const { callbackUrl, error } = searchParams;
+  const { callbackUrl, error } = await searchParams;
 
   // If user is already logged in, redirect to dashboard or callback URL
   if (session) {
@@ -27,7 +27,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Iniciar sesión
+            Inicia sesión en Podium
           </h1>
           <p className="text-sm text-muted-foreground">
             Ingresa tus credenciales para acceder a tu cuenta

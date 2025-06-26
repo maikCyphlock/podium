@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 };
 
 interface RegisterPageProps {
-  searchParams: { callbackUrl?: string; error?: string };
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }
 
-export default function RegisterPage({ searchParams }: RegisterPageProps) {
-  const { callbackUrl, error } = searchParams;
+export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+  const { callbackUrl, error } = await searchParams;
   
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
@@ -34,7 +34,7 @@ export default function RegisterPage({ searchParams }: RegisterPageProps) {
         <div className="flex flex-col space-y-2 text-center">
           <Icons.PersonStanding className="mx-auto h-6 w-6" />
           <h1 className="text-2xl font-semibold tracking-tight">
-            Crear una cuenta
+            Crea tu cuenta
           </h1>
           <p className="text-sm text-muted-foreground">
             &quot;Podium ha transformado la forma en que gestionamos nuestras carreras. ¡Increíble herramienta!&quot;
