@@ -59,3 +59,33 @@ Comandos de Desarrollo (para referencia)
     npm run test:ui
     npm run test:run
     npm runtest:e2e
+
+lista de los Gitmojis más comunes y su significado:
+
+✨ :sparkles: - Introducir una nueva característica.
+
+🐛 :bug: - Corregir un error.
+
+📝 :memo: - Escribir documentación.
+
+♻️ :recycle: - Refactorizar código.
+
+🚀 :rocket: - Desplegar cambios.
+
+✅ :white_check_mark: - Añadir o actualizar pruebas.
+
+🎉 :tada: - Primera confirmación.
+
+⬆️ :arrow_up: - Actualizar dependencias.
+
+⬇️ :arrow_down: - Bajar dependencias.
+
+🩹 :adhesive_bandage: - Corrección rápida.
+
+🔧 :wrench: - Cambios en archivos de configuración.
+
+➕ :heavy_plus_sign: - Añadir una dependencia.
+
+➖ :heavy_minus_sign: - Eliminar una dependencia.
+
+💡 :bulb: - Añadir o actualizar comentarios en el código.

@@ -82,6 +82,33 @@ This project adheres to a philosophy of rigor and reliability, inspired by NASA'
 
 ## GIT
 use gitmoji to commit
+✨ :sparkles: - Introducir una nueva característica.
+
+🐛 :bug: - Corregir un error.
+
+📝 :memo: - Escribir documentación.
+
+♻️ :recycle: - Refactorizar código.
+
+🚀 :rocket: - Desplegar cambios.
+
+✅ :white_check_mark: - Añadir o actualizar pruebas.
+
+🎉 :tada: - Primera confirmación.
+
+⬆️ :arrow_up: - Actualizar dependencias.
+
+⬇️ :arrow_down: - Bajar dependencias.
+
+🩹 :adhesive_bandage: - Corrección rápida.
+
+🔧 :wrench: - Cambios en archivos de configuración.
+
+➕ :heavy_plus_sign: - Añadir una dependencia.
+
+➖ :heavy_minus_sign: - Eliminar una dependencia.
+
+💡 :bulb: - Añadir o actualizar comentarios en el código.
 
 ** Try every time to make most decouple code but without making overengineering**
 ## Commands
