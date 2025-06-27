@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Select } from "@/components/ui/select";
 import { eventSchema, type EventInput } from "@/lib/validations/schemas";
+import { ResultForm } from "@/components/result-form";
+import { Loading } from "@/components/ui/Loading";
+import { ErrorMessage } from "@/components/ui/ErrorMessage";
 
 export default function EventDetailPage() {
   const router = useRouter();
@@ -97,9 +100,9 @@ export default function EventDetailPage() {
     }
   }
 
-  if (loading) return <div>Cargando evento...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!event) return <div>Evento no encontrado</div>;
+  if (loading) return <Loading />;
+  if (error) return <ErrorMessage message={error} />;
+  if (!event) return <ErrorMessage message="Evento no encontrado" />;
 
   return (
     <div className="max-w-xl mx-auto p-4">
@@ -132,6 +135,11 @@ export default function EventDetailPage() {
         {/* TODO: Select de categorías si es necesario */}
         <Button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar Cambios"}</Button>
       </form>
+      {/* Formulario de subida de resultados */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-2">Subir Resultado Manual</h2>
+        <ResultForm eventId={eventId} />
+      </div>
     </div>
   );
 }

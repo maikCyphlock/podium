@@ -16,6 +16,7 @@ import {
   containsUppercaseSchema,
   containsSpecialCharSchema,
 } from '@/lib/utils/validation';
+import { resultSchema } from '@/lib/validations/schemas';
 
 describe('Validation Schemas', () => {
   describe('nameSchema', () => {
@@ -220,6 +221,70 @@ describe('Validation Schemas', () => {
       expect(containsSpecialCharSchema.safeParse('abc@123').success).toBe(true);
       expect(containsSpecialCharSchema.safeParse('abc#123').success).toBe(true);
       expect(containsSpecialCharSchema.safeParse('abc123').success).toBe(false);
+    });
+  });
+
+  describe('resultSchema', () => {
+    test('valida un resultado válido', () => {
+      const valid = {
+        time: '00:45:12',
+        position: 1,
+        bibNumber: '123',
+        status: 'FINISHED',
+        notes: 'Sin incidencias',
+        raceId: 'ckl8v7z8g0000s6y7g7g7g7g',
+        categoryId: 'ckl8v7z8g0000s6y7g7g7g7g8',
+        participantId: 'ckl8v7z8g0000s6y7g7g7g7g9',
+      };
+      const parsed = resultSchema.safeParse(valid);
+      expect(parsed.success).toBe(true);
+    });
+
+    test('falla si falta un campo requerido', () => {
+      const invalid = {
+        position: 1,
+        bibNumber: '123',
+        status: 'FINISHED',
+        notes: 'Sin incidencias',
+        raceId: 'ckl8v7z8g0000s6y7g7g7g7g7',
+        categoryId: 'ckl8v7z8g0000s6y7g7g7g7g8',
+        participantId: 'ckl8v7z8g0000s6y7g7g7g7g9',
+      };
+      const parsed = resultSchema.safeParse(invalid);
+      expect(parsed.success).toBe(false);
+      expect(parsed.error && parsed.error.issues.some(i => i.path.includes('time'))).toBe(true);
+    });
+
+    test('falla si la posición no es positiva', () => {
+      const invalid = {
+        time: '00:45:12',
+        position: 0,
+        bibNumber: '123',
+        status: 'FINISHED',
+        notes: 'Sin incidencias',
+        raceId: 'ckl8v7z8g0000s6y7g7g7g7g7',
+        categoryId: 'ckl8v7z8g0000s6y7g7g7g7g8',
+        participantId: 'ckl8v7z8g0000s6y7g7g7g7g9',
+      };
+      const parsed = resultSchema.safeParse(invalid);
+      expect(parsed.success).toBe(false);
+      expect(parsed.error && parsed.error.issues.some(i => i.path.includes('position'))).toBe(true);
+    });
+
+    test('falla si el status es inválido', () => {
+      const invalid = {
+        time: '00:45:12',
+        position: 1,
+        bibNumber: '123',
+        status: 'INVALID',
+        notes: 'Sin incidencias',
+        raceId: 'ckl8v7z8g0000s6y7g7g7g7g7',
+        categoryId: 'ckl8v7z8g0000s6y7g7g7g7g8',
+        participantId: 'ckl8v7z8g0000s6y7g7g7g7g9',
+      };
+      const parsed = resultSchema.safeParse(invalid);
+      expect(parsed.success).toBe(false);
+      expect(parsed.error && parsed.error.issues.some(i => i.path.includes('status'))).toBe(true);
     });
   });
 }); 
