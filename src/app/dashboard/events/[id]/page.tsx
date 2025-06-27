@@ -10,6 +10,11 @@ import { eventSchema, type EventInput } from "@/lib/validations/schemas";
 import { ResultForm } from "@/components/result-form";
 import { Loading } from "@/components/ui/Loading";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { toast } from "sonner";
 
 export default function EventDetailPage() {
   const router = useRouter();
@@ -84,6 +89,7 @@ export default function EventDetailPage() {
       if (!parsed.success) {
         setError("Datos inválidos: " + parsed.error.issues.map(i => i.message).join(", "));
         setSaving(false);
+        toast.error("Error al guardar", { description: "Datos inválidos: " + parsed.error.issues.map(i => i.message).join(", ") });
         return;
       }
       const res = await fetch(`/api/events/${eventId}`, {
@@ -93,8 +99,10 @@ export default function EventDetailPage() {
       });
       if (!res.ok) throw new Error("Error al guardar cambios");
       router.refresh();
+      toast.success("¡Evento actualizado!", { description: "Los datos del evento se guardaron correctamente." });
     } catch (e: any) {
       setError(e.message);
+      toast.error("Error al guardar", { description: e.message });
     } finally {
       setSaving(false);
     }
@@ -117,8 +125,56 @@ export default function EventDetailPage() {
           <Input name="description" value={form.description || ""} onChange={handleChange} />
         </div>
         <div>
-          <Label htmlFor="date">Fecha</Label>
-          <Input name="date" type="datetime-local" value={form.date ? new Date(form.date).toISOString().slice(0, 16) : ""} onChange={handleChange} required />
+          <Label htmlFor="date">Fecha y hora</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={"w-full justify-start text-left font-normal"}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {form.date
+                  ? format(new Date(form.date), "PPP HH:mm", { locale: es })
+                  : <span>Selecciona fecha y hora</span>
+                }
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className="flex flex-col gap-2 p-2">
+                <Calendar
+                  mode="single"
+                  selected={form.date ? new Date(form.date) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      // Mantén la hora si ya existe, o pon 00:00
+                      const prev = form.date ? new Date(form.date) : undefined;
+                      const hours = prev ? prev.getHours() : 0;
+                      const minutes = prev ? prev.getMinutes() : 0;
+                      date.setHours(hours, minutes, 0, 0);
+                      setForm((prev) => ({ ...prev, date: date.toISOString() }));
+                    }
+                  }}
+                  captionLayout="dropdown"
+                  disabled={(date) => date < new Date('1900-01-01')}
+                />
+                <Input
+                  name="dateTime"
+                  type="time"
+                  value={form.date ? new Date(form.date).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', hour12: false }) : ""}
+                  onChange={e => {
+                    const time = e.target.value;
+                    if (form.date) {
+                      const d = new Date(form.date);
+                      const [h, m] = time.split(":");
+                      d.setHours(Number(h), Number(m), 0, 0);
+                      setForm(prev => ({ ...prev, date: d.toISOString() }));
+                    }
+                  }}
+                  className="w-32 mx-auto"
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div>
           <Label htmlFor="location">Ubicación</Label>
