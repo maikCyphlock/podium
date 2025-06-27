@@ -28,11 +28,17 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
-type FormData = ProfileInput;
+export interface ProfileFormProps {
+  initialValues?: Partial<ProfileInput>;
+  onSubmit: (data: ProfileInput) => Promise<void>;
+  isLoading?: boolean;
+  mode?: 'onboarding' | 'profile';
+}
 
-export function ProfileForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(new Date());
+export function ProfileForm({ initialValues, onSubmit, isLoading = false, mode = 'profile' }: ProfileFormProps) {
+  const [date, setDate] = useState<Date | undefined>(
+    initialValues?.birthDate ? new Date(initialValues.birthDate) : undefined
+  );
   const router = useRouter();
   const { data: session, update } = useSession();  
 
@@ -42,7 +48,8 @@ export function ProfileForm() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FormData>({
+    reset,
+  } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: '',
@@ -59,125 +66,51 @@ export function ProfileForm() {
       documentNumber: '',
       address: '',
       acceptTerms: false,
+      ...initialValues,
     },
   });
 
-  // Watch birthDate for the calendar
+  // Si cambian los initialValues, resetea el formulario
+  useEffect(() => {
+    if (initialValues) {
+      reset({
+        firstName: '',
+        lastName: '',
+        birthDate: new Date().toISOString(),
+        gender: 'PREFER_NOT_TO_SAY',
+        country: 'Venezuela',
+        city: '',
+        phone: '',
+        emergencyContact: '',
+        emergencyPhone: '',
+        bloodType: 'UNKNOWN',
+        documentType: 'DNI',
+        documentNumber: '',
+        address: '',
+        acceptTerms: false,
+        ...initialValues,
+      });
+      if (initialValues.birthDate) {
+        setDate(new Date(initialValues.birthDate));
+      }
+    }
+  }, [initialValues, reset]);
+
   const birthDate = watch('birthDate');
   const birthDateDate = birthDate ? new Date(birthDate) : undefined;
 
-  // Load profile data if it exists
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Add credentials to include cookies
-        const response = await fetch('/api/user/profile', {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        // Check if the response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          const text = await response.text();
-          console.error('Expected JSON, got:', text);
-          throw new Error('El servidor respondió con un formato inesperado');
-        }
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          console.error('API Error:', data);
-          // Handle 401 Unauthorized
-          if (response.status === 401) {
-            router.push('/login');
-            return;
-          }
-          throw new Error(data.error || 'Error al cargar el perfil');
-        }
-        
-        // Validate response structure
-        if (!data.user) {
-          throw new Error('Respuesta del servidor inválida');
-        }
-        
-        // Map profile data to form if profile exists
-        if (data.user.profile) {
-          Object.entries(data.user.profile).forEach(([key, value]) => {
-            if (value !== null && value !== undefined) {
-              // Type-safe way to set form values
-              const formKey = key as keyof FormData;
-              const formValue = value as any;
-              
-              // Special handling for birthDate
-              if (formKey === 'birthDate' && formValue) {
-                const dateValue = new Date(formValue);
-                if (!isNaN(dateValue.getTime())) {
-                  setDate(dateValue);
-                  setValue('birthDate', dateValue.toISOString());
-                }
-              } else {
-                setValue(formKey, formValue);
-              }
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Error loading profile:', error);
-        
-        // Only show error if it's not an auth redirect
-        if (!(error instanceof Error && error.message.includes('401'))) {
-          toast.error('Error', {
-            description: error instanceof Error 
-              ? error.message 
-              : 'No se pudo cargar el perfil. Intenta de nuevo más tarde.',
-          });
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, [setValue]);
-
-  const onSubmit = async (data: FormData) => {
+  const onSubmitForm = async (data: ProfileInput) => {
     if (!data.acceptTerms) {
       toast.error('Error', {
         description: 'Debes aceptar los términos y condiciones',
       });
       return;
     }
-
+    
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          birthDate: new Date(data.birthDate).toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || 'Error al guardar el perfil');
-      }
-
-      toast.success('¡Perfil actualizado!', {
-        description: 'Tu perfil ha sido guardado correctamente.',
-      });
-      await update({ user: { ...session?.user, onboardingCompleted: true } });
-
-      router.push('/dashboard');
+      await onSubmit(data);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al guardar el perfil';
       toast.error('Error', {
@@ -191,13 +124,17 @@ export function ProfileForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Completa tu perfil</h2>
+        <h2 className="text-2xl font-bold">
+          {mode === 'onboarding' ? 'Completa tu perfil' : 'Editar perfil'}
+        </h2>
         <p className="text-muted-foreground">
-          Necesitamos algunos datos adicionales para personalizar tu experiencia.
+          {mode === 'onboarding'
+            ? 'Necesitamos algunos datos adicionales para personalizar tu experiencia.'
+            : 'Actualiza tu información personal.'}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">Nombres</Label>
@@ -255,6 +192,7 @@ export function ProfileForm() {
                   initialFocus
                   disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                   locale={es}
+                  captionLayout="dropdown"
                 />
               </PopoverContent>
             </Popover>
