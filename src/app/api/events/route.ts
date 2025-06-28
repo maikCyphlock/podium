@@ -64,6 +64,11 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(total / limit),
         limit,
       },
+    },{
+      headers:{
+         "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=10, stale-while-revalidate=10"
+      }
     });
   } catch (error) {
     console.error('Error fetching events:', error);

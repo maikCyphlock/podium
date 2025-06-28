@@ -15,6 +15,8 @@ export const eventSchema = z.object({
   image: z.string().optional(),
   isPublished: z.boolean().optional().default(false),
   categoryIds: z.array(z.string().cuid()).optional(),
+  slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres').optional(),
+  status: z.enum(['ACTIVO', 'FINALIZADO', 'CANCELADO', 'POSTERGADO']).optional().default('ACTIVO'),
 });
 
 export const categorySchema = z.object({

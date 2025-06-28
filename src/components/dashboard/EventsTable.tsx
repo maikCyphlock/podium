@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { getEventStatusVariant } from "@/lib/utils";
 
 // Este tipo debe coincidir con lo que devuelve la API de eventos
 interface Event {
@@ -24,6 +25,7 @@ interface Event {
   };
   // La API devuelve `_count` pero podemos simplificarlo para el componente
   participantCount: number;
+  status: string;
 }
 
 export function EventsTable() {
@@ -74,6 +76,8 @@ export function EventsTable() {
     }
   };
 
+ 
+
   if (loading) {
     return <div>Cargando eventos...</div>; // TODO: Reemplazar con un Skeleton Loader
   }
@@ -84,8 +88,9 @@ export function EventsTable() {
         <TableRow>
           <TableHead>Nombre del Evento</TableHead>
           <TableHead>Fecha</TableHead>
-          <TableHead>Estatus</TableHead>
+          <TableHead>publicado</TableHead>
           <TableHead className="text-right">Inscritos</TableHead>
+          <TableHead className="text-right">Estado</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
         </TableRow>
       </TableHeader>
@@ -102,10 +107,16 @@ export function EventsTable() {
                 </TableCell>
                 <TableCell className="text-right">{event.participantCount}</TableCell>
                 <TableCell className="text-right">
+                  <Badge variant={getEventStatusVariant(event.status)}>
+                    {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/dashboard/events/${event.id}`}>Gestionar</Link>
                   </Button>
                 </TableCell>
+                
               </TableRow>
             );
           })

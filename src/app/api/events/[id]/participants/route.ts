@@ -33,9 +33,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
   try {
     const eventId = params.id;
     const participants = await prisma.participant.findMany({ where: { eventId } });
-    return NextResponse.json(participants);
+    return NextResponse.json(participants,{
+      headers:{
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=30, stale-while-revalidate=30"
+      }
+    });
   } catch (error) {
     console.error('Error al obtener participantes:', error);
-    return NextResponse.json({ error: 'Error al obtener los participantes' }, { status: 500 });
+    return NextResponse.json({ error: 'Error al obtener los participantes' }, { status: 500 ,
+      headers:{
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=30, stale-while-revalidate=30"
+      }
+     });
   }
 } 

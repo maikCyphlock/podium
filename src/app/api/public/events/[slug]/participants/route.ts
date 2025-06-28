@@ -53,5 +53,10 @@ export async function GET(request: Request, { params }: { params: { slug: string
   if (!participant) {
     return NextResponse.json({ success: false });
   }
-  return NextResponse.json({ success: true, participant });
+  return NextResponse.json({ success: true, participant },{
+    headers:{
+       "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=10, stale-while-revalidate=10"
+    }
+  });
 } 

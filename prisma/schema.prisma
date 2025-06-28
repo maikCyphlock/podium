@@ -100,6 +100,7 @@ model Event {
   races        Race[]
   participants Participant[]
   results      Result[]
+  status       EventStatus   @default(ACTIVO)
 }
 
 model Category {
@@ -168,4 +169,11 @@ enum Role {
   USER
   ORGANIZER
   ADMIN
+}
+
+enum EventStatus {
+  ACTIVO
+  FINALIZADO
+  CANCELADO
+  POSTERGADO
 }

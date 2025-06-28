@@ -8,9 +8,10 @@ export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
+  const {id} = await params
   try {
     const event = await prisma.event.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         user: { select: { id: true, name: true, email: true } },
         categories: true,
@@ -20,7 +21,11 @@ export async function GET(
     if (!event) {
       return NextResponse.json({ error: 'Evento no encontrado' }, { status: 404 });
     }
-    return NextResponse.json(event);
+    return NextResponse.json(event,{
+      headers:{
+      "Cache-Control": "public, max-age=10"
+      }
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Error al obtener el evento' }, { status: 500 });
   }
@@ -32,6 +37,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const {id} = await params
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -42,10 +48,11 @@ export async function PUT(
     }
     const { categoryIds, ...eventData } = validation.data;
     const updatedEvent = await prisma.event.update({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
       data: {
         ...eventData,
         date: new Date(eventData.date),
+        slug: eventData.slug ,
         categories: categoryIds && categoryIds.length > 0 ? {
           set: categoryIds.map((id: string) => ({ id }))
         } : undefined,
@@ -55,8 +62,13 @@ export async function PUT(
         user: { select: { id: true, name: true, email: true } },
       },
     });
-    return NextResponse.json(updatedEvent);
+    return NextResponse.json(updatedEvent,{
+      headers:{
+        "Cache-Control":"no-store"
+      }
+    });
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: 'Error al actualizar el evento' }, { status: 500 });
   }
 } 
