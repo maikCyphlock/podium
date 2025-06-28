@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { z } from 'zod';
 import { resultSchema, type ResultInput } from '@/lib/validations/schemas';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
-import { Select } from './ui/select';
 
 interface ResultFormProps {
   eventId: string;
 }
 
 export const ResultForm: React.FC<ResultFormProps> = ({ eventId }) => {
-  const [races, setRaces] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [races, setRaces] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [participants, setParticipants] = useState<{ id: string; firstName: string; lastName: string }[]>([]);
   const [form, setForm] = useState<Partial<ResultInput>>({ status: 'FINISHED' });
   const [errors, setErrors] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,10 +26,10 @@ export const ResultForm: React.FC<ResultFormProps> = ({ eventId }) => {
           fetch(`/api/events/${eventId}/categories`),
           fetch(`/api/events/${eventId}/participants`),
         ]);
-        setRaces(await racesRes.json());
-        setCategories(await categoriesRes.json());
-        setParticipants(await participantsRes.json());
-      } catch (e) {
+        setRaces((await racesRes.json()) as { id: string; name: string }[]);
+        setCategories((await categoriesRes.json()) as { id: string; name: string }[]);
+        setParticipants((await participantsRes.json()) as { id: string; firstName: string; lastName: string }[]);
+      } catch {
         setErrors('Error al cargar datos relacionados');
       }
     }
@@ -59,7 +57,7 @@ export const ResultForm: React.FC<ResultFormProps> = ({ eventId }) => {
       // await fetch(`/api/events/${eventId}/results`, { ... })
       setSuccess(true);
       setForm({ status: 'FINISHED' });
-    } catch (e: any) {
+    } catch {
       setErrors('Error al guardar el resultado');
     } finally {
       setLoading(false);
@@ -72,21 +70,21 @@ export const ResultForm: React.FC<ResultFormProps> = ({ eventId }) => {
         <Label htmlFor="raceId">Carrera</Label>
         <select name="raceId" value={form.raceId || ''} onChange={handleChange} required className="w-full border rounded p-2">
           <option value="">Selecciona una carrera</option>
-          {races.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+          {races.map((r: { id: string; name: string }) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </select>
       </div>
       <div>
         <Label htmlFor="categoryId">Categoría</Label>
         <select name="categoryId" value={form.categoryId || ''} onChange={handleChange} required className="w-full border rounded p-2">
           <option value="">Selecciona una categoría</option>
-          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {categories.map((c: { id: string; name: string }) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
       <div>
         <Label htmlFor="participantId">Participante</Label>
         <select name="participantId" value={form.participantId || ''} onChange={handleChange} required className="w-full border rounded p-2">
           <option value="">Selecciona un participante</option>
-          {participants.map(p => <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>)}
+          {participants.map((p: { id: string; firstName: string; lastName: string }) => <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>)}
         </select>
       </div>
       <div>

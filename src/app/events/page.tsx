@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import EventsListClient from '../../components/public/EventsListClient';
 
 export default async function EventsPage() {

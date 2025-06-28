@@ -41,7 +41,7 @@ export function EventsTable() {
         }
         const data = await response.json();
         // Mapeamos los datos para que coincidan con la estructura esperada
-        const formattedEvents = data.data.map((event: any) => ({
+        const formattedEvents = data.data.map((event: Event) => ({
           ...event,
           participantCount: event._count?.participants ?? 0,
         }));

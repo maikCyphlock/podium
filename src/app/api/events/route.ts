@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/options';
 import { prisma } from '@/lib/db/prisma';
 import { eventSchema } from '@/lib/validations/schemas';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
@@ -15,19 +16,19 @@ export async function GET(request: Request) {
 
     // Si el usuario está autenticado, filtramos por sus eventos.
     // De lo contrario, mostramos los eventos públicos.
-    const whereClause = session?.user?.id
+    const whereClause: Prisma.EventWhereInput = session?.user?.id
       ? {
           userId: session.user.id,
           OR: [
-            { title: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
+            { title: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+            { description: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
           ],
         }
       : {
           isPublished: true,
           OR: [
-            { title: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
+            { title: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+            { description: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
           ],
         };
 

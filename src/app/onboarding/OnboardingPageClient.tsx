@@ -159,7 +159,7 @@ export default function OnboardingPageClient() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              "Podium ha transformado la forma en que gestionamos nuestras carreras. ¡Increíble herramienta!"
+              &quot;Podium ha transformado la forma en que gestionamos nuestras carreras. ¡Increíble herramienta!&quot;
             </p>
             <footer className="text-sm">María González</footer>
             <footer className="text-sm opacity-70">Organizadora de carreras</footer>

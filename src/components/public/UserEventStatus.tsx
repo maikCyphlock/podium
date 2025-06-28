@@ -81,7 +81,7 @@ export function UserEventStatus({ slug }: UserEventStatusProps) {
       <ul className="text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
         <li><b>Email:</b> {p.email}</li>
         <li><b>Fecha de nacimiento:</b> {p.birthDate ? new Date(p.birthDate).toLocaleDateString('es-VE') : "No especificada"}</li>
-        <li><b>Género:</b> {p.gender =='MALE' ? 'masculino':p.gender =='FEMALE'? 'femenino' :'desconocido'} </li>
+        <li><b>Género:</b> {p.gender =='MALE' ? 'masculino':p.gender =='FEMALE'? 'femenino' : 'desconocido'} </li>
         <li><b>País:</b> {p.country}</li>
         {p.phone && <li><b>Teléfono:</b> {p.phone}</li>}
         {p.emergencyContact && <li><b>Contacto de emergencia:</b> {p.emergencyContact}</li>}

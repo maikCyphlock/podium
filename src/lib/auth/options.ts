@@ -23,7 +23,7 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  // @ts-ignore - PrismaAdapter has a type mismatch with the latest NextAuth
+  // @ts-expect-error - PrismaAdapter has a type mismatch with the latest NextAuth
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",

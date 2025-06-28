@@ -47,12 +47,12 @@ export default function EventDetailPage() {
           location: data.location,
           image: data.image,
           isPublished: data.isPublished,
-          categoryIds: data.categories?.map((c: any) => c.id) || [],
+          categoryIds: data.categories?.map((c: { id: string }) => c.id) || [],
           slug: data.slug,
           status: data.status,
         });
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Error desconocido');
       } finally {
         setLoading(false);
       }
@@ -63,16 +63,14 @@ export default function EventDetailPage() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const target = e.target;
     const { name, value, type } = target;
-    setForm((prev) => {
-      let updated = {
-        ...prev,
-        [name]: type === "checkbox" && target instanceof HTMLInputElement ? target.checked : value,
-      };
-      if (name === "title") {
-        updated.slug = slugify(value);
-      }
-      return updated;
-    });
+    const updated = {
+      ...form,
+      [name]: type === "checkbox" && target instanceof HTMLInputElement ? target.checked : value,
+    };
+    if (name === "title") {
+      updated.slug = slugify(value);
+    }
+    setForm(updated);
     if (name === "title") {
       if (value.length < 3) {
         setTitleError("El título debe tener al menos 3 caracteres");
@@ -122,9 +120,10 @@ export default function EventDetailPage() {
       if (!res.ok) throw new Error("Error al guardar cambios");
       router.refresh();
       toast.success("¡Evento actualizado!", { description: "Los datos del evento se guardaron correctamente." });
-    } catch (e: any) {
-      setError(e.message);
-      toast.error("Error al guardar", { description: e.message });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Error desconocido';
+      setError(msg);
+      toast.error("Error al guardar", { description: msg });
     } finally {
       setSaving(false);
     }

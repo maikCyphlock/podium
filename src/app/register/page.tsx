@@ -52,7 +52,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         )}
         
         <p className="px-8 text-center text-sm text-muted-foreground">
-          Al hacer clic en "Crear cuenta", aceptas nuestros{' '}
+          Al hacer clic en &quot;Crear cuenta&quot;, aceptas nuestros{' '}
           <Link
             href="/terms"
             className="hover:text-brand underline underline-offset-4"

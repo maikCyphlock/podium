@@ -3,11 +3,11 @@ import { authOptions } from './options';
 
 declare module 'next-auth' {
   interface Session {
-    update: (data: any) => Promise<any>;
+    update: (data: unknown) => Promise<unknown>;
   }
 }
 
-export async function update(data: any) {
+export async function update(data: unknown) {
   const session = await getServerSession(authOptions);
   if (session && typeof session.update === 'function') {
     return session.update(data);

@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
       },
     });
     return NextResponse.json({ success: true, participant });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Error al inscribirse' }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Error al inscribirse' }, { status: 400 });
   }
 } 

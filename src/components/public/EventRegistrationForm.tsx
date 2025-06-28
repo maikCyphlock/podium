@@ -19,7 +19,6 @@ export function EventRegistrationForm({ slug }: EventRegistrationFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [userCount, setUserCount] = useState<number | null>(null);
-  const [checkingCount, setCheckingCount] = useState(false);
 
   const {
     register,
@@ -45,12 +44,10 @@ export function EventRegistrationForm({ slug }: EventRegistrationFormProps) {
   // Consultar cuántas inscripciones tiene el usuario autenticado
   useEffect(() => {
     if (!userId) return;
-    setCheckingCount(true);
     fetch(`/api/public/participants/count?userId=${userId}`)
       .then(res => res.json())
       .then(data => setUserCount(data.count))
-      .catch(() => setUserCount(null))
-      .finally(() => setCheckingCount(false));
+      .catch(() => setUserCount(null));
   }, [userId]);
 
   const onSubmit = async (data: ParticipantInput) => {
@@ -77,6 +74,7 @@ export function EventRegistrationForm({ slug }: EventRegistrationFormProps) {
       }
     } catch (error) {
       toast.error("Error", { description: "No se pudo inscribir" });
+      console.error(error)
     } finally {
       setIsLoading(false);
     }

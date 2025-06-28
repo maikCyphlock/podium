@@ -40,8 +40,8 @@ export function ProfileForm({ initialValues, onSubmit, isLoading: externalIsLoad
     initialValues?.birthDate ? new Date(initialValues.birthDate) : undefined
   );
   const [internalIsLoading, setInternalIsLoading] = useState(false);
-  const router = useRouter();
-  const { data: session, update } = useSession();  
+ 
+
 
   // Usar el loading externo o interno
   const isLoading = externalIsLoading || internalIsLoading;
@@ -208,7 +208,7 @@ export function ProfileForm({ initialValues, onSubmit, isLoading: externalIsLoad
           <div className="space-y-2">
             <Label htmlFor="gender">Género</Label>
             <Select
-              onValueChange={(value) => setValue('gender', value as any)}
+              onValueChange={(value) => setValue('gender', value as unknown)}
               defaultValue="PREFER_NOT_TO_SAY"
             >
               <SelectTrigger>
@@ -300,7 +300,7 @@ export function ProfileForm({ initialValues, onSubmit, isLoading: externalIsLoad
           <div className="space-y-2">
             <Label htmlFor="bloodType">Tipo de sangre</Label>
             <Select
-              onValueChange={(value) => setValue('bloodType', value as any)}
+              onValueChange={(value) => setValue('bloodType', value as unknown)}
               defaultValue="UNKNOWN"
             >
               <SelectTrigger>
@@ -328,7 +328,7 @@ export function ProfileForm({ initialValues, onSubmit, isLoading: externalIsLoad
           <div className="space-y-2">
             <Label htmlFor="documentType">Tipo de documento</Label>
             <Select
-              onValueChange={(value) => setValue('documentType', value as any)}
+              onValueChange={(value) => setValue('documentType', value as unknown)}
               defaultValue="DNI"
             >
               <SelectTrigger>

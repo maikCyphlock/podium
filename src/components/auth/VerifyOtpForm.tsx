@@ -28,6 +28,7 @@ export function VerifyOtpForm() {
       }
     } catch (error) {
       toast.error("Error", { description: "No se pudo verificar el código" });
+      console.error(error)
     } finally {
       setIsLoading(false);
     }

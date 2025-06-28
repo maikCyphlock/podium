@@ -15,7 +15,7 @@ export default async function OnboardingPage() {
   if (!session) {
     redirect('/login?callbackUrl=/onboarding');
   }
-  if ((session.user as any).onboardingCompleted) {
+  if ('onboardingCompleted' in session.user && (session.user as { onboardingCompleted?: boolean }).onboardingCompleted) {
     redirect('/dashboard');
   }
 

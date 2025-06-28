@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut, SessionProvider } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import { useState } from "react";
@@ -14,10 +14,9 @@ const navLinks = [
 ];
 
 export function Navbar() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const pathname = usePathname();
   const isLoggedIn = !!session?.user;
-  const userRole = session?.user?.role;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (

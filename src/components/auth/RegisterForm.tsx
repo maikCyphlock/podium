@@ -14,12 +14,12 @@ import { Icons } from '@/components/icons';
 import { VerifyOtpForm } from "@/components/auth/VerifyOtpForm";
 
 interface RegisterFormProps {
-  onSuccess?: () => void;
   onSwitchToLogin?: () => void;
   callbackUrl?: string;
+  defaultEmail?: string;
 }
 
-export function RegisterForm({ onSuccess, onSwitchToLogin, callbackUrl }: RegisterFormProps) {
+export function RegisterForm({ onSwitchToLogin, callbackUrl, defaultEmail }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
@@ -82,7 +82,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin, callbackUrl }: Regist
       <div className="grid gap-6">
         <h2 className="text-lg font-semibold text-center">Verifica tu correo electrónico</h2>
         <p className="text-sm text-muted-foreground text-center">Hemos enviado un código de verificación a <span className="font-medium">{registeredEmail}</span>. Ingresa el código para continuar.</p>
-        <VerifyOtpForm onSuccess={handleOtpSuccess} defaultEmail={registeredEmail} />
+        <VerifyOtpForm onSuccess={handleOtpSuccess} defaultEmail={defaultEmail} />
       </div>
     );
   }

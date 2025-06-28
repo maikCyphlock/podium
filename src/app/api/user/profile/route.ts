@@ -3,22 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { authOptions } from '@/lib/auth/options';
 import { profileSchema } from '@/lib/validations/schemas';
-import { getToken } from 'next-auth/jwt';
-import { headers } from 'next/headers';
 import { update } from '@/lib/auth/utils';
-
-// Helper function to create a JSON response with CORS headers
-const jsonResponse = (data: any, status: number = 200) => {
-  return new NextResponse(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
-};
 
 // Handle OPTIONS request for CORS preflight
 export async function OPTIONS() {
@@ -47,7 +32,7 @@ export async function POST(request: Request) {
     const profileData = profileSchema.parse(body);
     
     // Extract only the fields that belong to the Profile model
-    const { acceptTerms, ...profileFields } = profileData;
+    const profileFields = profileData;
     
     // Actualizar el perfil del usuario
     const updatedUser = await prisma.user.update({

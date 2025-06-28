@@ -26,7 +26,7 @@ export async function GET(
       "Cache-Control": "public, max-age=10"
       }
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error al obtener el evento' }, { status: 500 });
   }
 }
@@ -67,8 +67,7 @@ export async function PUT(
         "Cache-Control":"no-store"
       }
     });
-  } catch (error) {
-    console.error(error)
+  } catch {
     return NextResponse.json({ error: 'Error al actualizar el evento' }, { status: 500 });
   }
 } 

@@ -23,6 +23,7 @@ export default function ProfilePage() {
         }
       } catch (e) {
         toast.error('Error al cargar el perfil');
+        console.error(e)
       } finally {
         setIsLoading(false);
       }
