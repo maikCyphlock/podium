@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Icons } from '@/components/icons';
+import { VerifyOtpForm } from "@/components/auth/VerifyOtpForm";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -20,8 +21,9 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess, onSwitchToLogin, callbackUrl }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const router = useRouter();
-
 
   const {
     register,
@@ -40,22 +42,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin, callbackUrl }: Regist
     setIsLoading(true);
 
     try {
-      // 1. Register the user
-      const registerResponse = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const registerResult = await registerResponse.json();
-
-      if (!registerResponse.ok) {
-        throw new Error(registerResult.error || 'Error al registrar el usuario');
-      }
-
-      // 2. Sign in the user automatically after registration
+      // 1. Registrar usuario y loguear
       const signInResult = await signIn('credentials', {
         redirect: false,
         email: data.email,
@@ -68,19 +55,11 @@ export function RegisterForm({ onSuccess, onSwitchToLogin, callbackUrl }: Regist
       }
 
       toast.success('Registro exitoso', {
-        description: 'Tu cuenta ha sido creada correctamente. Redirigiendo...',
+        description: 'Tu cuenta ha sido creada. Ahora verifica tu correo.',
       });
 
-      // 3. Redirect to onboarding or success callback
-      if (onSuccess) {
-        onSuccess();
-      } else if (signInResult?.url) {
-        router.push(signInResult.url);
-        router.refresh();
-      } else {
-        router.push('/onboarding');
-        router.refresh();
-      }
+      setRegisteredEmail(data.email);
+      setShowOtp(true);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al registrar el usuario';
       toast.error('Error', {
@@ -90,6 +69,23 @@ export function RegisterForm({ onSuccess, onSwitchToLogin, callbackUrl }: Regist
       setIsLoading(false);
     }
   };
+
+  // Handler para cuando el OTP es verificado correctamente
+  const handleOtpSuccess = () => {
+    toast.success('Correo verificado', { description: 'Redirigiendo al onboarding...' });
+    router.push('/onboarding');
+    router.refresh();
+  };
+
+  if (showOtp) {
+    return (
+      <div className="grid gap-6">
+        <h2 className="text-lg font-semibold text-center">Verifica tu correo electrónico</h2>
+        <p className="text-sm text-muted-foreground text-center">Hemos enviado un código de verificación a <span className="font-medium">{registeredEmail}</span>. Ingresa el código para continuar.</p>
+        <VerifyOtpForm onSuccess={handleOtpSuccess} defaultEmail={registeredEmail} />
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6">

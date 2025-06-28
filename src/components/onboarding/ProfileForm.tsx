@@ -35,12 +35,16 @@ export interface ProfileFormProps {
   mode?: 'onboarding' | 'profile';
 }
 
-export function ProfileForm({ initialValues, onSubmit, isLoading = false, mode = 'profile' }: ProfileFormProps) {
+export function ProfileForm({ initialValues, onSubmit, isLoading: externalIsLoading = false, mode = 'profile' }: ProfileFormProps) {
   const [date, setDate] = useState<Date | undefined>(
     initialValues?.birthDate ? new Date(initialValues.birthDate) : undefined
   );
+  const [internalIsLoading, setInternalIsLoading] = useState(false);
   const router = useRouter();
   const { data: session, update } = useSession();  
+
+  // Usar el loading externo o interno
+  const isLoading = externalIsLoading || internalIsLoading;
 
   const {
     register,
@@ -107,7 +111,7 @@ export function ProfileForm({ initialValues, onSubmit, isLoading = false, mode =
       return;
     }
     
-    setIsLoading(true);
+    setInternalIsLoading(true);
 
     try {
       await onSubmit(data);
@@ -117,7 +121,7 @@ export function ProfileForm({ initialValues, onSubmit, isLoading = false, mode =
         description: errorMessage,
       });
     } finally {
-      setIsLoading(false);
+      setInternalIsLoading(false);
     }
   };
 

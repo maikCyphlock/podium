@@ -37,9 +37,9 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
-      return jsonResponse(
+      return NextResponse.json(
         { error: 'No autorizado' },
-        401
+        { status: 401 }
       );
     }
 
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return jsonResponse({
+    return NextResponse.json({
       user: updatedUser,
       message: 'Perfil actualizado exitosamente',
     });
@@ -102,16 +102,16 @@ export async function POST(request: Request) {
     
     if (error instanceof Error) {
       if (error.name === 'ZodError') {
-        return jsonResponse(
+        return NextResponse.json(
           { error: 'Datos de perfil inválidos', details: JSON.parse(error.message) },
-          400
+          { status: 400 }
         );
       }
     }
     
-    return jsonResponse(
+    return NextResponse.json(
       { error: 'Error al actualizar el perfil' },
-      500
+      { status: 500 }
     );
   }
 }
@@ -121,9 +121,9 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
-      return jsonResponse(
+      return NextResponse.json(
         { error: 'No autorizado' },
-        401
+        { status: 401 }
       );
     }
 
@@ -141,18 +141,18 @@ export async function GET() {
     });
 
     if (!user) {
-      return jsonResponse(
+      return NextResponse.json(
         { error: 'Usuario no encontrado' },
-        404
+        { status: 404 }
       );
     }
 
-    return jsonResponse({ user });
+    return NextResponse.json({ user });
   } catch (error) {
     console.error('Error al obtener el perfil:', error);
-    return jsonResponse(
+    return NextResponse.json(
       { error: 'Error al obtener el perfil' },
-      500
+      { status: 500 }
     );
   }
 }
