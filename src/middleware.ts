@@ -6,6 +6,11 @@ export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const token = await getToken({ req: request });
 
+  // Permitir acceso libre a rutas públicas
+  if (pathname.startsWith('/api/public/')) {
+    return NextResponse.next();
+  }
+
   // Protect non-auth API routes
   if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/')) {
     if (!token) {
@@ -14,7 +19,6 @@ export async function middleware(request: NextRequest) {
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    // If token exists, proceed to the API route which should handle its own authorization
     return NextResponse.next();
   }
 
@@ -26,6 +30,7 @@ export async function middleware(request: NextRequest) {
     '/api/auth',
     '/_next',
     '/favicon.ico',
+    'api/public/events'
   ];
 
   // Redirect old /auth/ routes to /

@@ -11,45 +11,46 @@ datasource db {
 }
 
 model User {
-  id                 String      @id @default(cuid())
-  name               String?
-  email              String      @unique
-  emailVerified      DateTime?
-  password           String
-  image              String?
-  role               Role        @default(USER)
-  onboardingCompleted Boolean     @default(false)
-  events             Event[]
-  accounts           Account[]
-  sessions           Session[]
-  profile            UserProfile?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  id                  String        @id @default(cuid())
+  name                String?
+  email               String        @unique
+  emailVerified       DateTime?
+  password            String
+  image               String?
+  role                Role          @default(USER)
+  onboardingCompleted Boolean       @default(false)
+  events              Event[]
+  accounts            Account[]
+  sessions            Session[]
+  profile             UserProfile?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  createdParticipants Participant[] @relation("CreatedParticipants")
 }
 
 model UserProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  firstName       String
-  lastName        String
-  birthDate       DateTime
-  gender          String
-  country         String
-  city            String
-  phone           String
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName        String
+  lastName         String
+  birthDate        DateTime
+  gender           String
+  country          String
+  city             String
+  phone            String
   emergencyContact String
-  emergencyPhone  String
-  bloodType       String?
-  documentType    String
-  documentNumber  String
-  address         String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  emergencyPhone   String
+  bloodType        String?
+  documentType     String
+  documentNumber   String
+  address          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Account {
-  id                 String  @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -62,7 +63,6 @@ model Account {
   id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
 
   @@unique([provider, providerAccountId])
 }
@@ -84,21 +84,22 @@ model VerificationToken {
 }
 
 model Event {
-  id          String     @id @default(cuid())
-  title       String
-  description String?
-  date        DateTime
-  location    String?
-  image       String?
-  isPublished Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories  Category[]
-  races       Race[]
+  id           String        @id @default(cuid())
+  title        String
+  description  String?
+  slug         String?       @unique
+  date         DateTime
+  location     String?
+  image        String?
+  isPublished  Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories   Category[]
+  races        Race[]
   participants Participant[]
-  results     Result[]
+  results      Result[]
 }
 
 model Category {
@@ -111,54 +112,56 @@ model Category {
 }
 
 model Race {
-  id          String       @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
   description String?
   distance    Float
   unit        String
   startTime   DateTime
   eventId     String
-  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   categories  Category[]
   results     Result[]
 }
 
 model Participant {
-  id           String   @id @default(cuid())
-  firstName    String
-  lastName     String
-  email        String
-  birthDate    DateTime
-  gender       String
-  country      String
-  city         String?
-  phone        String?
+  id               String   @id @default(cuid())
+  firstName        String
+  lastName         String
+  email            String
+  birthDate        DateTime
+  gender           String
+  country          String
+  city             String?
+  phone            String?
   emergencyContact String?
-  bloodType    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  eventId      String
-  event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  results      Result[]
+  bloodType        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  eventId          String
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  results          Result[]
+  createdBy        String?
+  createdByUser    User?    @relation("CreatedParticipants", fields: [createdBy], references: [id], onDelete: SetNull)
 }
 
 model Result {
-  id             String     @id @default(cuid())
-  time           String
-  position       Int
-  bibNumber      String
-  status         String     @default("FINISHED") // FINISHED, DNF, DNS, DSQ, etc.
-  notes          String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  eventId        String
-  event          Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  raceId         String
-  race           Race       @relation(fields: [raceId], references: [id], onDelete: Cascade)
-  categoryId     String
-  category       Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  participantId  String
-  participant    Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  time          String
+  position      Int
+  bibNumber     String
+  status        String      @default("FINISHED") // FINISHED, DNF, DNS, DSQ, etc.
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  eventId       String
+  event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  raceId        String
+  race          Race        @relation(fields: [raceId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

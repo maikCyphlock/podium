@@ -9,7 +9,7 @@ import { useState } from "react";
 const navLinks = [
   { href: "/", label: "Inicio" },
   { href: "/dashboard", label: "Dashboard", private: true },
-  { href: "/dashboard/events", label: "Eventos", private: true },
+  { href: "/events", label: "Eventos", private: true },
   { href: "/dashboard/profile", label: "Perfil", private: true },
 ];
 
