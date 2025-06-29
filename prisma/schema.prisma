@@ -45,6 +45,7 @@ model UserProfile {
   documentType     String
   documentNumber   String
   address          String
+  acceptTerms      Boolean?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
