@@ -114,7 +114,7 @@ export function UserEventStatus({ slug }: UserEventStatusProps) {
           <p className="mb-4 text-green-900 font-medium">
             Tienes <b>{participants[0].length}</b> inscripción(es) para este evento:
           </p>
-          {participants[0].map(renderCard)}
+          {participants[0] ?  participants[0]?.map(renderCard) : participants.map(renderCard) }
           
         </>
       )}

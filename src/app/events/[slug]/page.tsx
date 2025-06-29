@@ -56,8 +56,8 @@ async function getEvent(slug: string) {
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded text-blue-900 text-sm">
         Puedes inscribir hasta <span className="font-semibold">5 participantes</span> por cuenta en este evento. Si necesitas registrar más, por favor utiliza otra cuenta o contacta a los organizadores.
       </div>
-      <UserEventStatus slug={params.slug} />
-      <EventRegistrationForm slug={params.slug} />
+      <UserEventStatus slug={slug} />
+      <EventRegistrationForm slug={slug} />
     </div>
   );
 } 

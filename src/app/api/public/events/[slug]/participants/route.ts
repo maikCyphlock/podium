@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
       },
     });
   } else if (email) {
-    participant = await prisma.participant.findFirst({
+    let data = await prisma.participant.findFirst({
       where: { email, eventId: event.id },
       select: {
         id: true,
@@ -49,6 +49,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
         createdAt: true,
       },
     });
+    participant = [data]
   }
   if (!participant) {
     return NextResponse.json({ success: false });
