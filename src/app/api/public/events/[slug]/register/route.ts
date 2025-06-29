@@ -1,13 +1,33 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { participantSchema } from '@/lib/validations/schemas';
 import { getToken } from 'next-auth/jwt';
+import { withRateLimit } from "next-limitr";
 
-export async function POST(request: Request, { params }: { params: { slug: string } }) {
+export const POST = withRateLimit({
+  limit: 1,
+  windowMs: 60 * 1000,
+  handler(req, usage) {
+  return NextResponse.json(
+    { 
+      error: 'Has excedido el límite de intentos. Por favor, espera un momento antes de intentar nuevamente.',
+      retryAfter: Math.ceil((usage.remaining - Date.now()) / 1000)
+    }, 
+    { 
+      status: 429,
+      headers: {
+        'Retry-After': Math.ceil((usage.remaining - Date.now()) / 1000).toString()
+      }
+    }
+  );
+  }, // 1 minuto
+})(async (request: NextRequest) => {
   try {
     const token = await getToken({ req: request });
     const userId = token?.id;
-    const slug = params.slug;
+    // Extraer slug de la URL
+    const match = request.nextUrl.pathname.match(/\/api\/public\/events\/(.+)\/register/);
+    const slug = match ? match[1] : null;
     if (!slug) {
       return NextResponse.json({ error: 'Slug requerido' }, { status: 400 });
     }
@@ -42,4 +62,4 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   } catch (error: unknown) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Error al inscribirse' }, { status: 400 });
   }
-} 
+}); 
