@@ -5,7 +5,7 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const token = await getToken({ req: request });
-
+ 
   // Permitir acceso libre a rutas públicas
   if (pathname.startsWith('/api/public/')) {
     return NextResponse.next();
@@ -30,7 +30,8 @@ export async function middleware(request: NextRequest) {
     '/api/auth',
     '/_next',
     '/favicon.ico',
-    'api/public/events'
+    'api/public/events',
+    '/events'
   ];
 
   // Redirect old /auth/ routes to /
@@ -44,11 +45,29 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Definición de roles y rutas protegidas
+  const protectedRoutes: Record<string, string[]> = {
+    '/dashboard': ['ORGANIZER', 'ADMIN'],
+    '/admin': ['ADMIN'],
+    // Agrega más rutas y roles según necesidad
+  };
+
   // If no token, redirect protected pages to login
   if (!token) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('callbackUrl', pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ''));
     return NextResponse.redirect(loginUrl);
+  }
+
+  // --- Control de acceso por roles ---
+  for (const route in protectedRoutes) {
+    if (pathname.startsWith(route)) {
+      const allowedRoles = protectedRoutes[route];
+      if (!token.role || !allowedRoles.includes(token.role)) {
+        // Si el usuario no tiene el rol adecuado, redirige a la página de acceso denegado
+        return NextResponse.redirect(new URL('/forbidden', request.url));
+      }
+    }
   }
 
   // --- User is authenticated at this point ---
