@@ -1,0 +1,135 @@
+---
+description: 
+globs: *.prisma
+alwaysApply: false
+---
+ Este documento detalla las mejores prácticas para manejar cambios en el esquema de la base de datos con Prisma y desplegar nuevas funcionalidades de forma segura en tus aplicaciones Next.js.
+
+1. Estrategia de Migración de Base de Datos con Prisma
+Prisma Migrate es una herramienta potente, pero su uso requiere disciplina para evitar tiempo de inactividad y pérdida de datos. La filosofía clave es la no-destructividad en tus migraciones.
+
+a) Migraciones "Forward-Only" (Aditivas y No Destructivas)
+La regla de oro es favorecer siempre las migraciones aditivas. Esto significa que, en lugar de modificar o eliminar directamente una columna existente, se añaden nuevas.
+
+Añadir Nuevas Columnas: Si necesitas un cambio en el tipo de datos o en la semántica de una columna, añade una nueva columna con el tipo deseado. Mantén la antigua por un tiempo para asegurar la compatibilidad con versiones previas de tu aplicación y facilitar la migración de datos.
+
+Columnas Opcionales por Defecto: Cuando añadas una nueva columna, hazla opcional (String?) o asígnale un @default en tu esquema de Prisma. Esto asegura que los registros existentes en la base de datos (que no tendrán valor para esta nueva columna) no causen fallos de validación o aplicación.
+
+Code snippet
+
+// ❌ MAL: Cambio destructivo y riesgoso
+// model UserProfile {
+//   ...
+//   documentType String // Antes era String, ahora se quiere como un Enum
+// }
+
+// ✅ BIEN: Cambio aditivo y no destructivo (fase inicial)
+model UserProfile {
+  // ...
+  documentType   String // La columna vieja sigue existiendo
+  documentTypeV2 DocumentTypeEnum? // 1. Añadimos la nueva columna como opcional
+  // ...
+}
+b) El Patrón "Expand/Contract" (Expandir/Contraer) para Cambios Complejos
+Este es el método más profesional y seguro para realizar cambios complejos, como renombrar o reestructurar una columna, sin causar tiempo de inactividad (cero downtime). Este patrón se ejecuta en múltiples fases y requiere despliegues escalonados.
+
+Escenario de Ejemplo: Renombrar la columna title a eventName en tu tabla Event.
+
+Fase 1: EXPANDIR (Despliegue Inicial)
+
+Migración de Base de Datos (No Destructiva):
+
+Añade la nueva columna (eventName) en tu schema.prisma y hazla opcional (String?). La columna antigua (title) permanece sin cambios.
+
+Code snippet
+
+// schema.prisma
+model Event {
+  // ...
+  title      String   // La columna vieja aún existe
+  eventName  String?  // La nueva columna es opcional
+}
+Ejecuta npx prisma migrate dev para generar y aplicar la migración.
+
+Lógica de Aplicación (Doble Escritura, Lectura con Fallback):
+
+Modifica tu código (servidor, API Routes, Server Components) para que:
+
+Al escribir: Escriba simultáneamente en AMBAS columnas: la vieja (title) y la nueva (eventName).
+
+Al leer: Lea primero de la columna NUEVA (eventName). Si el valor es null o undefined (indicando un registro antiguo no migrado), entonces recurre a leer de la columna VIEJA (title) como fallback.
+
+TypeScript
+
+// src/lib/events/service.ts (Ejemplo conceptual en TypeScript/Next.js)
+
+// Función para leer el nombre del evento de forma segura
+function getEventName(event: Event): string {
+  return event.eventName ?? event.title; // Lee de la nueva; si no existe, de la vieja
+}
+
+// Función para actualizar/crear un evento con doble escritura
+async function updateOrCreateEvent(id: string, data: { name: string }) {
+  await prisma.event.update({ // o .create
+    where: { id },
+    data: {
+      title: data.name,       // Escribe en la columna antigua
+      eventName: data.name,   // Escribe en la nueva columna
+    },
+  });
+}
+Despliegue del Código (Fase Expandir): Despliega esta versión de tu aplicación. En este punto, tu aplicación es compatible con ambas estructuras de datos y puede manejar registros viejos y nuevos.
+
+Fase 2: MIGRAR DATOS (Proceso de Fondo)
+
+Ejecuta un script de "backfill": Crea y ejecuta un script único, fuera del ciclo de despliegue principal de la aplicación, para copiar los datos existentes de la columna antigua (title) a la nueva (eventName) para todos los registros que aún no tienen valor en eventName.
+
+TypeScript
+
+// scripts/migrate-title-to-eventName.ts
+// Ejecutar una sola vez después del despliegue de la Fase 1
+async function backfillEventNames() {
+  const eventsToMigrate = await prisma.event.findMany({
+    where: { eventName: null }, // Busca registros donde la nueva columna aún no tiene valor
+  });
+
+  console.log(`Migrando ${eventsToMigrate.length} eventos...`);
+  for (const event of eventsToMigrate) {
+    await prisma.event.update({
+      where: { id: event.id },
+      data: { eventName: event.title }, // Copia el valor de la columna antigua a la nueva
+    });
+  }
+  console.log('Migración de nombres de eventos completada.');
+}
+
+backfillEventNames().catch(console.error);
+Fase 3: CONTRAER (Despliegue Final de Lógica)
+
+Refactorización del Código de Aplicación: Una vez que confirmes que todos los datos han sido migrados y que el código de la Fase 1 ha estado en producción sin problemas por un tiempo prudencial (asegurando que todos los clientes tienen la última versión), refactoriza tu código para:
+
+Solo leer y escribir en la columna NUEVA (eventName).
+
+Elimina cualquier lógica de fallback o doble escritura relacionada con la columna antigua (title).
+
+Despliegue del Código (Fase Contraer): Despliega esta nueva versión de tu aplicación.
+
+Fase 4: LIMPIEZA (Despliegue de Esquema Final)
+
+Migración de Base de Datos (Destructiva pero Segura):
+
+Ahora que la columna title ya no es utilizada por ninguna versión de tu código en producción, puedes eliminarla de forma segura de tu schema.prisma.
+
+Considera hacer la columna eventName obligatoria si su naturaleza lo requiere.
+
+Code snippet
+
+// schema.prisma
+model Event {
+  // ...
+  // title      String   // <-- Esta línea se elimina
+  eventName  String   // Ahora es la columna principal, posiblemente obligatoria
+}
+Ejecuta npx prisma migrate dev. Esto creará una migración que realizará un DROP COLUMN en tu base de datos. Es un cambio destructivo, pero seguro porque ninguna parte de tu aplicación lo está utilizando ya.
+
+Este proceso detallado, aunque parece largo, es la garantía de un despliegue sin tiempo de inactividad, manteniendo la retrocompatibilidad y la integridad de los datos.

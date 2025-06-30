@@ -26,6 +26,7 @@ model User {
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   createdParticipants Participant[] @relation("CreatedParticipants")
+  deletedAt    DateTime?
 }
 
 model UserProfile {
@@ -102,6 +103,7 @@ model Event {
   participants Participant[]
   results      Result[]
   status       EventStatus   @default(ACTIVO)
+  deletedAt    DateTime?
 }
 
 model Category {
@@ -111,6 +113,7 @@ model Category {
   events      Event[]
   races       Race[]
   results     Result[]
+  deletedAt    DateTime?
 }
 
 model Race {
@@ -124,6 +127,7 @@ model Race {
   event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   categories  Category[]
   results     Result[]
+  deletedAt    DateTime?
 }
 
 model Participant {
@@ -145,6 +149,7 @@ model Participant {
   results          Result[]
   createdBy        String?
   createdByUser    User?    @relation("CreatedParticipants", fields: [createdBy], references: [id], onDelete: SetNull)
+  deletedAt    DateTime?
 }
 
 model Result {
