@@ -1,0 +1,37 @@
+---
+description: 
+globs: *.tsx,*.js,*.ts,*.jsx,*.json
+alwaysApply: false
+---
+Programación Defensiva
+
+Tu código siempre debe estar preparado para manejar datos "incompletos".
+
+1. Manejo Explícito de Valores Ausentes (Nullish Coalescing y Valores por Defecto)
+Cuando consumas o proceses objetos de una base de datos (o cualquier fuente externa), asume que cualquier propiedad nueva puede no existir en registros antiguos o en ciertos escenarios.
+
+Evita undefined y null en la lógica crítica: Utiliza el operador de encadenamiento opcional (?.) y el operador de fusión nula (??) para acceder a propiedades y proporcionar valores por defecto de manera segura y concisa.
+
+Ejemplo: En lugar de const nombre = usuario.perfil.nombre;, usa const nombre = usuario.perfil?.nombre ?? 'Desconocido';
+
+Provee valores por defecto coherentes: Asegúrate de que, si una propiedad es crucial para el funcionamiento de una característica, siempre tenga un valor inicial predecible si no se encuentra en el origen de datos.
+
+2. Validación Rigurosa de Esquemas con Zod
+Zod es tu primera línea de defensa para garantizar la integridad de los datos en tiempo de ejecución. Utilízalo proactivamente para definir la forma exacta de tus datos y manejar las variaciones con gracia:
+
+Campos Opcionales con .optional(): Para propiedades que pueden no estar siempre presentes (especialmente en datos heredados o de migraciones), declara el campo como opcional.
+
+Ejemplo: z.string().optional()
+
+Valores Predeterminados con .default(): Cuando un campo opcional deba tener un valor específico si no se proporciona, usa .default() para asignárselo directamente en el esquema. Esto simplifica la lógica de negocio posterior.
+
+Ejemplo: z.number().default(0) para un contador, o z.boolean().default(false) para un indicador.
+
+Transformación y Coerción: Considera usar Zod para transformar tipos de datos (ej. cadenas a números o fechas) o para sanear entradas.
+
+3. Estrategias Adicionales de Resiliencia
+Registro (Logging) Detallado: Implementa un registro robusto para capturar y notificar cuando los datos "incompletos" son manejados por los valores por defecto o las validaciones. Esto ayuda en la depuración y en la identificación de posibles problemas en la fuente de datos.
+
+Pruebas de Borde (Edge Cases): Desarrolla pruebas unitarias y de integración que simulen escenarios con datos faltantes, undefined, null, y tipos de datos inesperados.
+
+Retrocompatibilidad: Al diseñar nuevas características o modificar modelos de datos, piensa en cómo impactarán los datos existentes y asegúrate de que el código sea retrocompatible.
