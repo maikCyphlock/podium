@@ -13,7 +13,7 @@ export async function GET(
     return NextResponse.json({ error: 'Slug requerido' }, { status: 400 });
   }
   const event = await prisma.event.findFirst({
-    where: { slug, isPublished: true },
+    where: { slug, isPublished: true, deletedAt: null },
     select: {
       id: true,
       title: true,

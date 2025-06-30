@@ -13,10 +13,10 @@ export default async function OnboardingPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login?callbackUrl=/onboarding');
+    redirect('/login?callbackUrl=/events');
   }
   if ('onboardingCompleted' in session.user && (session.user as { onboardingCompleted?: boolean }).onboardingCompleted) {
-    redirect('/dashboard');
+    redirect('/events');
   }
 
   return <OnboardingPageClient />;

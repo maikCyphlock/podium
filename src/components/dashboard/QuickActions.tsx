@@ -5,7 +5,7 @@ export function QuickActions() {
   return (
     <div className="flex items-center gap-2">
       <Button asChild>
-        <Link href="/dashboard/events/new">+ Crear Nuevo Evento</Link>
+        <Link href="/dashboard/events/create">+ Crear Nuevo Evento</Link>
       </Button>
     </div>
   );

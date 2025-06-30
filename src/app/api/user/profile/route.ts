@@ -114,7 +114,7 @@ export async function GET() {
 
     // Obtener el perfil del usuario
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email,deletedAt: null },
       select: {
         id: true,
         name: true,
